@@ -3,14 +3,17 @@ package telegram
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
+	"pocketTeleBot/pkg/pocketAPI"
 )
 
 type Bot struct {
-	bot *tgbotapi.BotAPI
+	bot          *tgbotapi.BotAPI
+	pocketClient *pocketAPI.Client
+	redirectUrl  string
 }
 
-func NewBot(bot *tgbotapi.BotAPI) *Bot {
-	return &Bot{bot: bot}
+func NewBot(bot *tgbotapi.BotAPI, pocketClient *pocketAPI.Client, redirectUrl string) *Bot {
+	return &Bot{bot: bot, pocketClient: pocketClient, redirectUrl: redirectUrl}
 }
 
 func (b *Bot) Start() error {
@@ -32,15 +35,12 @@ func (b *Bot) updatesHandler(updates tgbotapi.UpdatesChannel) {
 			continue
 		}
 
-		b.handleMessage(update.Message)
-	}
-}
+		if update.Message.IsCommand() {
+			b.handleCommand(update.Message)
+			continue
+		}
 
-func (b *Bot) handleMessage(message *tgbotapi.Message) {
-	msg := tgbotapi.NewMessage(message.Chat.ID, "Fuck!!!")
-	_, err := b.bot.Send(msg)
-	if err != nil {
-		log.Panic(err)
+		b.handleMessage(update.Message)
 	}
 }
 
