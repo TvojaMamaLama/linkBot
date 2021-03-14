@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 )
@@ -9,6 +8,7 @@ import (
 const (
 	commandStart = "start"
 	greeting     = "Привет перейди по ссылке, чтобы дать доступ к сохранению ссылок!\n%s"
+	alreadyAuth  = "Вы уже авторизированы"
 )
 
 func (b *Bot) handleMessage(message *tgbotapi.Message) {
@@ -29,8 +29,11 @@ func (b *Bot) handleCommand(command *tgbotapi.Message) error {
 }
 
 func (b *Bot) handleStart(command *tgbotapi.Message) error {
-	authLink, err := b.generateAuthLink(command.Chat.ID)
-	msg := tgbotapi.NewMessage(command.Chat.ID, fmt.Sprintf(greeting, authLink))
+	_, err := b.getAccessToken(command.Chat.ID)
+	if err != nil {
+		return b.makeAuth(command)
+	}
+	msg := tgbotapi.NewMessage(command.Chat.ID, alreadyAuth)
 	_, err = b.bot.Send(msg)
 	return err
 }

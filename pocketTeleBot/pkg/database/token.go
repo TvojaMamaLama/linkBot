@@ -1,4 +1,4 @@
-package db
+package database
 
 type Bucket string
 
@@ -7,7 +7,7 @@ const (
 	RequestToken Bucket = "request_token"
 )
 
-type TokenDb interface {
+type TokenDB interface {
 	Save(chatID int64, token string, bucket Bucket) error
-	Get(chatID int64, token string, bucket Bucket) error
+	Get(chatID int64, bucket Bucket) (string, error)
 }
