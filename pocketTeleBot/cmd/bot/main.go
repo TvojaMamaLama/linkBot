@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/boltdb/bolt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"pocketTeleBot/pkg/pocketAPI"
@@ -18,6 +19,11 @@ func main() {
 	pocketClient, err := pocketAPI.NewCLient(consumerKey)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	db, err := bolt.Open("bot.db", 0600, nil)
+	if err != nil {
+		log.Fatal()
 	}
 
 	telegramBot := telegram.NewBot(bot, pocketClient, "http://localhost/")
