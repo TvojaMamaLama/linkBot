@@ -30,7 +30,6 @@ func (s *AuthorizationServer) Start() error {
 
 func (s *AuthorizationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -53,6 +52,12 @@ func (s *AuthorizationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	resp, err := s.pocketClient.Authorize(r.Context(), requestToken)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = s.tokenDb.Save(chatID, resp.AccessToken, database.AccessToken)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

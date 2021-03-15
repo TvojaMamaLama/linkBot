@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -170,7 +171,8 @@ func (c *Client) Authorize(ctx context.Context, requestToken string) (*Authorize
 		return nil, err
 	}
 
-	accessToken, username := values.Get("acces_token"), values.Get("username")
+	accessToken, username := values.Get("access_token"), values.Get("username")
+	log.Println()
 	if accessToken == "" {
 		return nil, errors.New("empty access token in API response")
 	}
