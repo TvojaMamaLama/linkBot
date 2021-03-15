@@ -1,8 +1,10 @@
 package telegram
 
 import (
+	"context"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
+	"net/url"
+	"pocketTeleBot/pkg/pocketAPI"
 )
 
 const (
@@ -11,12 +13,34 @@ const (
 	alreadyAuth  = "Вы уже авторизированы"
 )
 
-func (b *Bot) handleMessage(message *tgbotapi.Message) {
-	msg := tgbotapi.NewMessage(message.Chat.ID, "Fuck!!!")
-	_, err := b.bot.Send(msg)
+func (b *Bot) handleMessage(message *tgbotapi.Message) error {
+	msg := tgbotapi.NewMessage(message.Chat.ID, "Успешно сохранена!")
+
+	_, err := url.ParseRequestURI(message.Text)
 	if err != nil {
-		log.Panic(err)
+		msg.Text = "Некорректная ссылка."
+		_, err := b.bot.Send(msg)
+		return err
 	}
+
+	accessToken, err := b.getAccessToken(message.Chat.ID)
+	if err != nil {
+		msg.Text = "Ты не авторизирован, отправь /start."
+		_, err := b.bot.Send(msg)
+		return err
+	}
+
+	if err := b.pocketClient.Add(context.Background(), pocketAPI.AddInput{
+		AccessToken: accessToken,
+		URL:         message.Text,
+	}); err != nil {
+		msg.Text = "Не удалось сохранить ссылку.Попробуйте позже."
+		_, err := b.bot.Send(msg)
+		return err
+	}
+
+	_, err = b.bot.Send(msg)
+	return err
 }
 
 func (b *Bot) handleCommand(command *tgbotapi.Message) error {
