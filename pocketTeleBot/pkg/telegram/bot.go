@@ -11,11 +11,11 @@ type Bot struct {
 	bot          *tgbotapi.BotAPI
 	pocketClient *pocketAPI.Client
 	tokenDB      database.TokenDB
-	redirectUrl  string
+	serverUrl    string
 }
 
-func NewBot(bot *tgbotapi.BotAPI, pocketClient *pocketAPI.Client, redirectUrl string, tokenDB database.TokenDB) *Bot {
-	return &Bot{bot: bot, pocketClient: pocketClient, redirectUrl: redirectUrl, tokenDB: tokenDB}
+func NewBot(bot *tgbotapi.BotAPI, pocketClient *pocketAPI.Client, serverUrl string, tokenDB database.TokenDB) *Bot {
+	return &Bot{bot: bot, pocketClient: pocketClient, serverUrl: serverUrl, tokenDB: tokenDB}
 }
 
 func (b *Bot) Start() error {
@@ -38,11 +38,15 @@ func (b *Bot) updatesHandler(updates tgbotapi.UpdatesChannel) {
 		}
 
 		if update.Message.IsCommand() {
-			b.handleCommand(update.Message)
+			if err := b.handleCommand(update.Message); err != nil {
+				b.handleError(update.Message.Chat.ID, err)
+			}
 			continue
 		}
 
-		b.handleMessage(update.Message)
+		if err := b.handleMessage(update.Message); err != nil {
+			b.handleError(update.Message.Chat.ID, err)
+		}
 	}
 }
 

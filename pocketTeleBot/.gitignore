@@ -1,4 +1,4 @@
 .idea
-.bin
-cmd/bot/settings.go
 ../.idea
+settings
+.env

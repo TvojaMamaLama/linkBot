@@ -38,7 +38,7 @@ func (b *Bot) generateAuthLink(chatID int64) (string, error) {
 }
 
 func (b *Bot) generateRedirectLink(chatID int64) string {
-	return fmt.Sprintf("%s?chat_id=%d", b.redirectUrl, chatID)
+	return fmt.Sprintf("%s?chat_id=%d", b.serverUrl, chatID)
 }
 
 func (b *Bot) getAccessToken(chatID int64) (string, error) {
